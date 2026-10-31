@@ -71,7 +71,7 @@ class CalculatorsTest {
             historicalObservationsCount = 10
         )
         assertFalse(unavailableReport.isReliableCapacityAvailable)
-        assertNull(validReport.capacityHealthPercentage == null, unavailableReport.capacityHealthPercentage)
+        assertNull(unavailableReport.capacityHealthPercentage)
         assertTrue(unavailableReport.explanation.contains("Battery capacity health cannot be measured reliably"))
 
         // Glitched values: 0 or out-of-bounds (e.g. 50000mAh)
