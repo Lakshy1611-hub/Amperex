@@ -4,32 +4,32 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// AMOLED Black & Graphite Palette
-val AmoledBlack = Color(0xFF000000)
-val GraphiteSurface = Color(0xFF121214)
-val GraphiteCard = Color(0xFF1C1C1F)
-val GraphiteCardBorder = Color(0xFF28282D)
+// AmpereX signature palette: midnight navy, vivid cyan, violet and mint.
+val AmoledBlack = Color(0xFF080B16)
+val GraphiteSurface = Color(0xFF11182A)
+val GraphiteCard = Color(0xFF182238)
+val GraphiteCardBorder = Color(0xFF293957)
 
-// Brand Accents
-val ElectricLime = Color(0xFFCCFF00)
-val MintAccent = Color(0xFF00F0A8)
-val ElectricLimeDim = Color(0x33CCFF00)
+val ElectricLime = Color(0xFF65E8FF)
+val MintAccent = Color(0xFF53E0B2)
+val ElectricLimeDim = Color(0x3365E8FF)
+val VioletAccent = Color(0xFF9B8CFF)
+val BlueAccent = Color(0xFF568BFF)
+val PinkAccent = Color(0xFFFF7EB6)
 
-// Status & Warnings
-val AmberWarning = Color(0xFFFFB800)
-val CrimsonAlert = Color(0xFFFF4444)
+val AmberWarning = Color(0xFFFFC15C)
+val CrimsonAlert = Color(0xFFFF667D)
 
-// Text Colors
-val TextPrimary = Color(0xFFF4F4F6)
-val TextSecondary = Color(0xFF9E9EA7)
-val TextMuted = Color(0xFF656570)
+val TextPrimary = Color(0xFFF4F7FF)
+val TextSecondary = Color(0xFFAAB6CC)
+val TextMuted = Color(0xFF75839D)
 
 val DarkColorScheme = darkColorScheme(
     primary = ElectricLime,
-    onPrimary = Color.Black,
+    onPrimary = Color(0xFF06121B),
     secondary = MintAccent,
-    onSecondary = Color.Black,
-    tertiary = AmberWarning,
+    onSecondary = Color(0xFF062018),
+    tertiary = VioletAccent,
     background = AmoledBlack,
     surface = GraphiteSurface,
     surfaceVariant = GraphiteCard,
@@ -40,16 +40,16 @@ val DarkColorScheme = darkColorScheme(
 )
 
 val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF4A8500),
+    primary = Color(0xFF087F9E),
     onPrimary = Color.White,
-    secondary = Color(0xFF008960),
+    secondary = Color(0xFF087D62),
     onSecondary = Color.White,
-    tertiary = Color(0xFFB87800),
-    background = Color(0xFFF8F9FA),
+    tertiary = Color(0xFF6555C7),
+    background = Color(0xFFF4F7FC),
     surface = Color(0xFFFFFFFF),
-    surfaceVariant = Color(0xFFF0F1F5),
-    onSurface = Color(0xFF1A1A1E),
-    onSurfaceVariant = Color(0xFF6B6B76),
-    outline = Color(0xFFE2E4E9),
-    error = Color(0xFFD32F2F)
+    surfaceVariant = Color(0xFFEAF0F8),
+    onSurface = Color(0xFF172238),
+    onSurfaceVariant = Color(0xFF5F6E86),
+    outline = Color(0xFFDCE4EF),
+    error = Color(0xFFC43E58)
 )
