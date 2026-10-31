@@ -120,6 +120,13 @@ class HealthRepository(
     }
 }
 
+data class DischargeSessionSnapshot(
+    val startedAt: Long?,
+    val startBatteryPercent: Int?,
+    val currentBatteryPercent: Int,
+    val isCharging: Boolean
+)
+
 class UsageStatsRepository(private val context: Context) {
 
     fun hasUsageStatsPermission(): Boolean {
@@ -132,42 +139,104 @@ class UsageStatsRepository(private val context: Context) {
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
-    suspend fun getAppUsageList(days: Int = 1): List<AppUsageInfo> = withContext(Dispatchers.IO) {
-        if (!hasUsageStatsPermission()) return@withContext emptyList()
+    fun getDischargeSessionSnapshot(): DischargeSessionSnapshot {
+        val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+        val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, 100) ?: 100
+        val currentPercent = if (level >= 0 && scale > 0) (level * 100 / scale).coerceIn(0, 100) else 0
+        val status = batteryIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+            status == BatteryManager.BATTERY_STATUS_FULL
 
-        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-            ?: return@withContext emptyList()
+        val prefs = context.getSharedPreferences("battery_usage_session", Context.MODE_PRIVATE)
+        var startedAt = prefs.getLong("started_at", 0L).takeIf { it > 0L }
+        var startLevel = if (prefs.contains("start_level")) prefs.getInt("start_level", currentPercent) else null
 
-        val endTime = System.currentTimeMillis()
-        val startTime = endTime - (days * 24L * 3600_000L)
-        val pm = context.packageManager
-
-        val stats = usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_BEST,
-            startTime,
-            endTime
-        ) ?: return@withContext emptyList()
-
-        stats
-            .filter { it.totalTimeInForeground > 60_000L }
-            .sortedByDescending { it.totalTimeInForeground }
-            .take(30)
-            .map { stat ->
-                val appName = try {
-                    val appInfo = pm.getApplicationInfo(stat.packageName, 0)
-                    pm.getApplicationLabel(appInfo).toString()
-                } catch (e: PackageManager.NameNotFoundException) {
-                    stat.packageName.substringAfterLast('.')
-                }
-
-                AppUsageInfo(
-                    packageName = stat.packageName,
-                    appName = appName,
-                    foregroundTimeMs = stat.totalTimeInForeground,
-                    lastTimeUsedMs = stat.lastTimeUsed,
-                    dailyForegroundMinutes = stat.totalTimeInForeground / 60_000L,
-                    weeklyForegroundMinutes = (stat.totalTimeInForeground * 7L) / 60_000L
-                )
-            }
+        // If AmpereX is installed/opened during an existing discharge, begin a transparent
+        // baseline now rather than pretending we know the earlier part of the session.
+        if (!isCharging && startedAt == null) {
+            startedAt = System.currentTimeMillis()
+            startLevel = currentPercent
+            prefs.edit().putLong("started_at", startedAt).putInt("start_level", currentPercent).apply()
+        }
+        if (isCharging) {
+            startedAt = null
+            startLevel = null
+        }
+        return DischargeSessionSnapshot(startedAt, startLevel, currentPercent, isCharging)
     }
+
+    suspend fun getAppUsageList(sinceTimestamp: Long? = null, days: Int = 1): List<AppUsageInfo> =
+        withContext(Dispatchers.IO) {
+            if (!hasUsageStatsPermission()) return@withContext emptyList()
+
+            val manager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+                ?: return@withContext emptyList()
+            val endTime = System.currentTimeMillis()
+            val startTime = sinceTimestamp?.takeIf { it > 0L }
+                ?: endTime - (days * 24L * 3600_000L)
+            val foregroundType = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
+                android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED
+            else android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND
+            val backgroundType = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
+                android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED
+            else android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND
+
+            val totals = linkedMapOf<String, Long>()
+            val lastUsed = linkedMapOf<String, Long>()
+            val events = manager.queryEvents(startTime, endTime)
+            val event = android.app.usage.UsageEvents.Event()
+            var foregroundPackage: String? = null
+            var foregroundStartedAt = 0L
+
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event)
+                val pkg = event.packageName ?: continue
+                when (event.eventType) {
+                    foregroundType -> {
+                        if (foregroundPackage != null && foregroundStartedAt > 0L) {
+                            val duration = (event.timeStamp - foregroundStartedAt).coerceAtLeast(0L)
+                            totals[foregroundPackage!!] = (totals[foregroundPackage!!] ?: 0L) + duration
+                        }
+                        foregroundPackage = pkg
+                        foregroundStartedAt = event.timeStamp
+                        lastUsed[pkg] = event.timeStamp
+                    }
+                    backgroundType -> {
+                        if (foregroundPackage == pkg && foregroundStartedAt > 0L) {
+                            val duration = (event.timeStamp - foregroundStartedAt).coerceAtLeast(0L)
+                            totals[pkg] = (totals[pkg] ?: 0L) + duration
+                            foregroundPackage = null
+                            foregroundStartedAt = 0L
+                        }
+                    }
+                }
+            }
+            if (foregroundPackage != null && foregroundStartedAt > 0L) {
+                val duration = (endTime - foregroundStartedAt).coerceAtLeast(0L)
+                totals[foregroundPackage!!] = (totals[foregroundPackage!!] ?: 0L) + duration
+            }
+
+            val pm = context.packageManager
+            totals.entries
+                .filter { it.value >= 5_000L }
+                .sortedByDescending { it.value }
+                .take(50)
+                .mapNotNull { (packageName, duration) ->
+                    try {
+                        val appInfo = pm.getApplicationInfo(packageName, 0)
+                        val appName = pm.getApplicationLabel(appInfo).toString()
+                        AppUsageInfo(
+                            packageName = packageName,
+                            appName = appName,
+                            foregroundTimeMs = duration,
+                            lastTimeUsedMs = lastUsed[packageName] ?: 0L,
+                            dailyForegroundMinutes = duration / 60_000L,
+                            weeklyForegroundMinutes = duration / 60_000L
+                        )
+                    } catch (_: PackageManager.NameNotFoundException) {
+                        null
+                    }
+                }
+        }
 }
