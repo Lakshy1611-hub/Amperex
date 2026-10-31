@@ -57,7 +57,7 @@ fun BatteryLevelRing(
             val strokePx = strokeWidth.toPx()
             // Background track
             drawArc(
-                color = Color(0xFF222226),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.62f),
                 startAngle = 135f,
                 sweepAngle = 270f,
                 useCenter = false,
