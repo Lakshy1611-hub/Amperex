@@ -54,6 +54,7 @@ import com.amperex.batteryintelligence.ui.components.MetricCard
 import com.amperex.batteryintelligence.ui.theme.BlueAccent
 import com.amperex.batteryintelligence.ui.theme.ElectricLime
 import com.amperex.batteryintelligence.ui.theme.MintAccent
+import com.amperex.batteryintelligence.ui.theme.PinkAccent
 import com.amperex.batteryintelligence.ui.theme.VioletAccent
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
