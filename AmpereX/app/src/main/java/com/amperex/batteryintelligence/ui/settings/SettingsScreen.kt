@@ -17,8 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.BatteryAlert
-import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material.icons.rounded.PrivacyTip
@@ -46,25 +44,20 @@ import androidx.compose.ui.unit.sp
 import com.amperex.batteryintelligence.ui.components.DisclaimerBanner
 import com.amperex.batteryintelligence.ui.theme.CrimsonAlert
 import com.amperex.batteryintelligence.ui.theme.ElectricLime
-import com.amperex.batteryintelligence.ui.theme.GraphiteCard
-import com.amperex.batteryintelligence.ui.theme.GraphiteCardBorder
-import com.amperex.batteryintelligence.ui.theme.TextMuted
-import com.amperex.batteryintelligence.ui.theme.TextSecondary
 
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
+    val colors = MaterialTheme.colorScheme
 
     if (state.showClearConfirmation) {
         AlertDialog(
             onDismissRequest = { viewModel.setClearConfirmationVisible(false) },
-            title = {
-                Text("Clear All Battery History?", fontWeight = FontWeight.Bold)
-            },
+            title = { Text("Clear All Battery History", fontWeight = FontWeight.Bold) },
             text = {
-                Text("This permanently wipes all recorded battery observations, charging sessions, and daily summaries from local Room database storage. This action cannot be undone.")
+                Text("This permanently wipes recorded battery observations, charging sessions, and daily summaries stored on this device. This action cannot be undone.")
             },
             confirmButton = {
                 Button(
@@ -76,10 +69,10 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.setClearConfirmationVisible(false) }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text("Cancel")
                 }
             },
-            containerColor = GraphiteCard
+            containerColor = colors.surface
         )
     }
 
@@ -92,62 +85,37 @@ fun SettingsScreen(
         Text(
             text = "Settings & Privacy",
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface
+            color = colors.onSurface
         )
         Text(
-            text = "Local controls, telemetry preferences, and data exports",
+            text = "Local controls, data preferences, and exports",
             style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary
+            color = colors.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Appearance & Units Section
-        Text(
-            text = "PREFERENCES",
-            style = MaterialTheme.typography.labelSmall,
-            color = TextSecondary
-        )
+        Text("PREFERENCES", style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
         Spacer(modifier = Modifier.height(8.dp))
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(GraphiteCard)
-                .border(1.dp, GraphiteCardBorder, RoundedCornerShape(16.dp))
-                .padding(16.dp)
-        ) {
+        SettingsCard {
             Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Rounded.DarkMode,
-                            contentDescription = null,
-                            tint = ElectricLime,
-                            modifier = Modifier.size(20.dp)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Appearance", fontWeight = FontWeight.SemiBold, color = colors.onSurface)
+                        Text(
+                            "Follows your phone's Light or Dark theme automatically",
+                            fontSize = 12.sp,
+                            color = colors.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text("AMOLED Pure Black", fontWeight = FontWeight.SemiBold)
-                            Text("Deep blacks save display energy", fontSize = 12.sp, color = TextMuted)
-                        }
                     }
-                    Switch(
-                        checked = state.isDarkMode,
-                        onCheckedChange = { viewModel.toggleDarkMode(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.Black,
-                            checkedTrackColor = ElectricLime
-                        )
-                    )
+                    Text("SYSTEM", color = colors.primary, style = MaterialTheme.typography.labelMedium)
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -158,21 +126,21 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Rounded.Thermostat,
                             contentDescription = null,
-                            tint = ElectricLime,
+                            tint = colors.primary,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text("Fahrenheit Temperature", fontWeight = FontWeight.SemiBold)
-                            Text("Display units in °F instead of °C", fontSize = 12.sp, color = TextMuted)
+                            Text("Fahrenheit Temperature", fontWeight = FontWeight.SemiBold, color = colors.onSurface)
+                            Text("Display °F instead of °C", fontSize = 12.sp, color = colors.onSurfaceVariant)
                         }
                     }
                     Switch(
                         checked = state.useFahrenheit,
                         onCheckedChange = { viewModel.toggleTemperatureUnit(it) },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.Black,
-                            checkedTrackColor = ElectricLime
+                            checkedThumbColor = colors.onPrimary,
+                            checkedTrackColor = colors.primary
                         )
                     )
                 }
@@ -181,40 +149,24 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Export Data Section
-        Text(
-            text = "DATA PORTABILITY & EXPORT",
-            style = MaterialTheme.typography.labelSmall,
-            color = TextSecondary
-        )
+        Text("DATA PORTABILITY & EXPORT", style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
         Spacer(modifier = Modifier.height(8.dp))
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(GraphiteCard)
-                .border(1.dp, GraphiteCardBorder, RoundedCornerShape(16.dp))
-                .padding(16.dp)
-        ) {
+        SettingsCard {
             Column {
+                Text("Export Historical Observations", fontWeight = FontWeight.SemiBold, color = colors.onSurface)
                 Text(
-                    text = "Export Historical Observations",
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Export timestamped percentage drops, voltage, and charging events to your device storage.",
+                    "Export recorded battery percentages, voltage, and charging events to your device.",
                     fontSize = 12.sp,
-                    color = TextMuted
+                    color = colors.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(14.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
                         onClick = { viewModel.exportCsv() },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = ElectricLime,
-                            contentColor = Color.Black
+                            containerColor = colors.primary,
+                            contentColor = colors.onPrimary
                         ),
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp)
@@ -227,8 +179,8 @@ fun SettingsScreen(
                     Button(
                         onClick = { viewModel.exportJson() },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF25252A),
-                            contentColor = TextPrimary
+                            containerColor = colors.secondaryContainer,
+                            contentColor = colors.onSecondaryContainer
                         ),
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp)
@@ -241,31 +193,25 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Android System Restrictions & Privacy Explanation
-        Text(
-            text = "SYSTEM & PRIVACY ARCHITECTURE",
-            style = MaterialTheme.typography.labelSmall,
-            color = TextSecondary
-        )
+        Text("SYSTEM & PRIVACY", style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
         Spacer(modifier = Modifier.height(8.dp))
 
         DisclaimerBanner(
-            text = "Zero Cloud Tracking: AmpereX does not contain advertising SDKs, tracking libraries, or remote servers. All calculations and records reside exclusively on your local device."
+            text = "AmpereX stores its battery records locally on this device. No account is required."
         )
-
         Spacer(modifier = Modifier.height(10.dp))
-
         DisclaimerBanner(
-            text = "Android Doze Policy: Modern Android stops background execution when the device is idle. AmpereX logs battery state changes via OS broadcasts rather than keeping permanent wake-locks that drain your battery."
+            text = "Android may limit background activity while the device is idle. Battery history is collected when Android allows the app to receive updates."
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Danger Zone: Clear History
         OutlinedButton(
             onClick = { viewModel.setClearConfirmationVisible(true) },
             colors = ButtonDefaults.outlinedButtonColors(contentColor = CrimsonAlert),
-            border = ButtonDefaults.outlinedButtonBorder.copy(brush = androidx.compose.ui.graphics.SolidColor(CrimsonAlert.copy(alpha = 0.5f))),
+            border = ButtonDefaults.outlinedButtonBorder.copy(
+                brush = androidx.compose.ui.graphics.SolidColor(CrimsonAlert.copy(alpha = 0.5f))
+            ),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -275,5 +221,20 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(28.dp))
+    }
+}
+
+@Composable
+private fun SettingsCard(content: @Composable () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(colors.surface)
+            .border(1.dp, colors.outlineVariant, RoundedCornerShape(16.dp))
+            .padding(16.dp)
+    ) {
+        content()
     }
 }
