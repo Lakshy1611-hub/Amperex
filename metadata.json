@@ -1,0 +1,6 @@
+{
+  "name": "AmpereX — Battery Intelligence",
+  "description": "Premium native Android battery intelligence and monitoring application built with Kotlin, Jetpack Compose, Room Database, and battery analytics engine.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

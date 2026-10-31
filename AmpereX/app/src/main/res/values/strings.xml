@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">AmpereX</string>
+    <string name="app_tagline">Battery Intelligence</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_analytics">Analytics</string>
+    <string name="nav_health">Health</string>
+    <string name="nav_apps">Apps</string>
+    <string name="nav_charging">Charging</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="battery_health_unavailable">Battery capacity health cannot be measured reliably on this device.</string>
+    <string name="usage_access_rationale">AmpereX needs Usage Access to analyze which applications you use the most. This stays strictly on your device. Note: Foreground duration does not equal exact mAh drain.</string>
+    <string name="foreground_service_notification_title">AmpereX Active Monitoring</string>
+    <string name="foreground_service_notification_desc">Tracking real-time charging wattage and battery metrics</string>
+</resources>

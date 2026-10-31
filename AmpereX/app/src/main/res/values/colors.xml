@@ -1,0 +1,18 @@
+<resources>
+    <!-- AMOLED Palette -->
+    <color name="amoled_black">#000000</color>
+    <color name="graphite_dark">#121214</color>
+    <color name="graphite_surface">#1C1C1F</color>
+    <color name="graphite_border">#2A2A2E</color>
+    
+    <!-- Accents -->
+    <color name="electric_lime">#CCFF00</color>
+    <color name="mint_accent">#00F0A8</color>
+    <color name="amber_warning">#FFB800</color>
+    <color name="crimson_alert">#FF4444</color>
+    
+    <!-- Text -->
+    <color name="text_primary">#F4F4F6</color>
+    <color name="text_secondary">#9E9EA7</color>
+    <color name="text_tertiary">#63636E</color>
+</resources>
