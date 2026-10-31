@@ -27,8 +27,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +54,21 @@ fun AppsScreen(
     viewModel: AppsViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    // Usage Access is a special app-op, not a runtime permission. Re-check it
+    // whenever the user returns from Android Settings so the screen never
+    // keeps showing a stale "permission required" state.
+    DisposableEffect(context, viewModel) {
+        val lifecycleOwner = context as? LifecycleOwner
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.checkPermissionAndLoad()
+            }
+        }
+        lifecycleOwner?.lifecycle?.addObserver(observer)
+        onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
+    }
 
     Column(
         modifier = Modifier
@@ -119,13 +139,32 @@ fun AppsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // App List
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                itemsIndexed(state.appUsageList) { index, app ->
-                    AppUsageItem(index + 1, app)
+            // App list and clear feedback while Android prepares usage history.
+            when {
+                state.isLoading -> {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text("Loading app usage…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                state.appUsageList.isEmpty() -> {
+                    Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Rounded.AppShortcut, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(36.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text("No app usage data yet", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                            Text("Use a few apps and check again. Android may take a little time to populate usage history.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(onClick = { viewModel.checkPermissionAndLoad() }) { Text("Refresh") }
+                        }
+                    }
+                }
+                else -> LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    itemsIndexed(state.appUsageList) { index, app ->
+                        AppUsageItem(index + 1, app)
+                    }
                 }
             }
         }
