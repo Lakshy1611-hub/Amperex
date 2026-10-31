@@ -22,14 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.amperex.batteryintelligence.ui.theme.GraphiteCard
-import com.amperex.batteryintelligence.ui.theme.GraphiteCardBorder
-import com.amperex.batteryintelligence.ui.theme.TextMuted
-import com.amperex.batteryintelligence.ui.theme.TextSecondary
 
 @Composable
 fun MetricCard(
@@ -40,47 +37,47 @@ fun MetricCard(
     accentColor: Color = MaterialTheme.colorScheme.primary,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    val shape = RoundedCornerShape(22.dp)
+    Column(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(GraphiteCard)
-            .border(1.dp, GraphiteCardBorder, RoundedCornerShape(16.dp))
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.72f), shape)
             .padding(16.dp)
     ) {
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (icon != null) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = accentColor,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (icon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(accentColor.copy(alpha = 0.13f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(icon, contentDescription = null, tint = accentColor, modifier = Modifier.size(19.dp))
                 }
-                Text(
-                    text = title.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TextSecondary
-                )
+                Spacer(modifier = Modifier.width(9.dp))
             }
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = value,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium
             )
-            if (subtitle != null) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
-                    color = TextMuted
-                )
-            }
+        }
+        Spacer(modifier = Modifier.height(13.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        if (subtitle != null) {
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 16.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -91,29 +88,28 @@ fun DisclaimerBanner(
     modifier: Modifier = Modifier,
     isWarning: Boolean = false
 ) {
-    val borderColor = if (isWarning) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f) else GraphiteCardBorder
-    val iconColor = if (isWarning) MaterialTheme.colorScheme.tertiary else TextSecondary
-
+    val borderColor = if (isWarning) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f)
+        else MaterialTheme.colorScheme.outline.copy(alpha = 0.75f)
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF141416))
-            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-            .padding(12.dp),
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f))
+            .border(1.dp, borderColor, RoundedCornerShape(18.dp))
+            .padding(14.dp),
         verticalAlignment = Alignment.Top
     ) {
         Icon(
             imageVector = Icons.Rounded.Info,
             contentDescription = null,
-            tint = iconColor,
-            modifier = Modifier.size(18.dp)
+            tint = if (isWarning) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(19.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp, lineHeight = 17.sp),
-            color = TextSecondary
+            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 17.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
