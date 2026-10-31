@@ -145,8 +145,13 @@ class UsageStatsRepository(private val context: Context) {
         val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, 100) ?: 100
         val currentPercent = if (level >= 0 && scale > 0) (level * 100 / scale).coerceIn(0, 100) else 0
         val status = batteryIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
-        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-            status == BatteryManager.BATTERY_STATUS_FULL
+        val plugged = batteryIntent?.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) ?: 0
+        // FULL can also be reported while unplugged on some Android builds.
+        // Treat it as charging only when a power source is actually connected.
+        val isCharging = plugged != 0 && (
+            status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                status == BatteryManager.BATTERY_STATUS_FULL
+            )
 
         val prefs = context.getSharedPreferences("battery_usage_session", Context.MODE_PRIVATE)
         var startedAt = prefs.getLong("started_at", 0L).takeIf { it > 0L }
