@@ -4,29 +4,29 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// AmpereX signature palette: midnight navy, vivid cyan, violet and mint.
-val AmoledBlack = Color(0xFF080B16)
-val GraphiteSurface = Color(0xFF11182A)
-val GraphiteCard = Color(0xFF182238)
-val GraphiteCardBorder = Color(0xFF293957)
+// Premium neutral surfaces with a restrained teal/indigo accent system.
+val AmoledBlack = Color(0xFF0B1017)
+val GraphiteSurface = Color(0xFF121A24)
+val GraphiteCard = Color(0xFF182330)
+val GraphiteCardBorder = Color(0xFF263747)
 
-val ElectricLime = Color(0xFF65E8FF)
-val MintAccent = Color(0xFF53E0B2)
-val ElectricLimeDim = Color(0x3365E8FF)
-val VioletAccent = Color(0xFF9B8CFF)
-val BlueAccent = Color(0xFF568BFF)
-val PinkAccent = Color(0xFFFF7EB6)
+val ElectricLime = Color(0xFF55D6C2)
+val MintAccent = Color(0xFF42C9A5)
+val ElectricLimeDim = Color(0x3355D6C2)
+val VioletAccent = Color(0xFF8C83F6)
+val BlueAccent = Color(0xFF669BFA)
+val PinkAccent = Color(0xFFE58BB7)
 
-val AmberWarning = Color(0xFFFFC15C)
-val CrimsonAlert = Color(0xFFFF667D)
+val AmberWarning = Color(0xFFF2B85B)
+val CrimsonAlert = Color(0xFFEF7182)
 
-val TextPrimary = Color(0xFFF4F7FF)
-val TextSecondary = Color(0xFFAAB6CC)
-val TextMuted = Color(0xFF75839D)
+val TextPrimary = Color(0xFFF2F5F8)
+val TextSecondary = Color(0xFFADB9C6)
+val TextMuted = Color(0xFF81909F)
 
 val DarkColorScheme = darkColorScheme(
     primary = ElectricLime,
-    onPrimary = Color(0xFF06121B),
+    onPrimary = Color(0xFF06211D),
     secondary = MintAccent,
     onSecondary = Color(0xFF062018),
     tertiary = VioletAccent,
@@ -40,16 +40,16 @@ val DarkColorScheme = darkColorScheme(
 )
 
 val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF087F9E),
+    primary = Color(0xFF087F78),
     onPrimary = Color.White,
-    secondary = Color(0xFF087D62),
+    secondary = Color(0xFF4C5FC7),
     onSecondary = Color.White,
-    tertiary = Color(0xFF6555C7),
-    background = Color(0xFFF4F7FC),
+    tertiary = Color(0xFF7257C8),
+    background = Color(0xFFF3F6F8),
     surface = Color(0xFFFFFFFF),
-    surfaceVariant = Color(0xFFEAF0F8),
-    onSurface = Color(0xFF172238),
-    onSurfaceVariant = Color(0xFF5F6E86),
-    outline = Color(0xFFDCE4EF),
-    error = Color(0xFFC43E58)
+    surfaceVariant = Color(0xFFE9EFF2),
+    onSurface = Color(0xFF17252C),
+    onSurfaceVariant = Color(0xFF5E7078),
+    outline = Color(0xFFD8E1E5),
+    error = Color(0xFFC04455)
 )
