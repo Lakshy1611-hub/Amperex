@@ -38,8 +38,8 @@ import com.amperex.batteryintelligence.ui.components.DisclaimerBanner
 import com.amperex.batteryintelligence.ui.components.InteractiveBatteryChart
 import com.amperex.batteryintelligence.ui.components.MetricCard
 import com.amperex.batteryintelligence.ui.theme.ElectricLime
-import com.amperex.batteryintelligence.ui.theme.GraphiteCard
-import com.amperex.batteryintelligence.ui.theme.GraphiteCardBorder
+import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.surface
+import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.outline
 import com.amperex.batteryintelligence.ui.theme.MintAccent
 import com.amperex.batteryintelligence.ui.theme.TextMuted
 import com.amperex.batteryintelligence.ui.theme.TextSecondary
@@ -75,8 +75,8 @@ fun AnalyticsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(GraphiteCard)
-                .border(1.dp, GraphiteCardBorder, RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                 .padding(4.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -126,7 +126,7 @@ fun AnalyticsScreen(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFF26262B))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
