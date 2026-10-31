@@ -41,8 +41,8 @@ import com.amperex.batteryintelligence.domain.model.PlugType
 import com.amperex.batteryintelligence.ui.components.DisclaimerBanner
 import com.amperex.batteryintelligence.ui.components.MetricCard
 import com.amperex.batteryintelligence.ui.theme.ElectricLime
-import com.amperex.batteryintelligence.ui.theme.GraphiteCard
-import com.amperex.batteryintelligence.ui.theme.GraphiteCardBorder
+import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.surface
+import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.outline
 import com.amperex.batteryintelligence.ui.theme.MintAccent
 import com.amperex.batteryintelligence.ui.theme.TextMuted
 import com.amperex.batteryintelligence.ui.theme.TextSecondary
@@ -82,8 +82,8 @@ fun ChargingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(GraphiteCard)
-                .border(1.dp, GraphiteCardBorder, RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
                 .padding(20.dp)
         ) {
             Column {
@@ -250,8 +250,8 @@ fun ChargingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(GraphiteCard)
-                    .border(1.dp, GraphiteCardBorder, RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(14.dp))
                     .padding(20.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -289,8 +289,8 @@ fun ChargingSessionItem(session: ChargingSession) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(GraphiteCard)
-            .border(1.dp, GraphiteCardBorder, RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
             .padding(14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
