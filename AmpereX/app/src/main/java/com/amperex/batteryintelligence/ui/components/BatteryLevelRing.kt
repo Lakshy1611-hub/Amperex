@@ -42,6 +42,7 @@ fun BatteryLevelRing(
         label = "BatteryRingAnimation"
     )
 
+    val trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.62f)
     val ringColor = when {
         status == ChargingStatus.CHARGING -> MintAccent
         percentage <= 15 -> CrimsonAlert
@@ -57,7 +58,7 @@ fun BatteryLevelRing(
             val strokePx = strokeWidth.toPx()
             // Background track
             drawArc(
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.62f),
+                color = trackColor,
                 startAngle = 135f,
                 sweepAngle = 270f,
                 useCenter = false,
