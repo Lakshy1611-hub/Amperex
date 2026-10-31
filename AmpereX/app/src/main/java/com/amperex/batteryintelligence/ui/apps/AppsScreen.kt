@@ -44,8 +44,6 @@ import androidx.compose.ui.unit.sp
 import com.amperex.batteryintelligence.domain.model.AppUsageInfo
 import com.amperex.batteryintelligence.ui.components.DisclaimerBanner
 import com.amperex.batteryintelligence.ui.theme.ElectricLime
-import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.surface
-import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.outline
 import com.amperex.batteryintelligence.ui.theme.TextMuted
 import com.amperex.batteryintelligence.ui.theme.TextSecondary
 
