@@ -39,8 +39,8 @@ import com.amperex.batteryintelligence.domain.model.BatteryHealthState
 import com.amperex.batteryintelligence.ui.components.DisclaimerBanner
 import com.amperex.batteryintelligence.ui.components.MetricCard
 import com.amperex.batteryintelligence.ui.theme.ElectricLime
-import com.amperex.batteryintelligence.ui.theme.GraphiteCard
-import com.amperex.batteryintelligence.ui.theme.GraphiteCardBorder
+import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.surface
+import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.outline
 import com.amperex.batteryintelligence.ui.theme.MintAccent
 import com.amperex.batteryintelligence.ui.theme.TextMuted
 import com.amperex.batteryintelligence.ui.theme.TextSecondary
@@ -76,8 +76,8 @@ fun HealthScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(GraphiteCard)
-                .border(1.dp, GraphiteCardBorder, RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
                 .padding(20.dp)
         ) {
             Column {
