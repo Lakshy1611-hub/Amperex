@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -31,10 +30,6 @@ import com.amperex.batteryintelligence.ui.home.HomeScreen
 import com.amperex.batteryintelligence.ui.home.HomeViewModel
 import com.amperex.batteryintelligence.ui.settings.SettingsScreen
 import com.amperex.batteryintelligence.ui.settings.SettingsViewModel
-import com.amperex.batteryintelligence.ui.theme.AmoledBlack
-import com.amperex.batteryintelligence.ui.theme.ElectricLime
-import com.amperex.batteryintelligence.ui.theme.GraphiteSurface
-import com.amperex.batteryintelligence.ui.theme.TextMuted
 
 @Composable
 fun AmpereXNavGraph(
@@ -48,13 +43,15 @@ fun AmpereXNavGraph(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val colors = MaterialTheme.colorScheme
 
     Scaffold(
-        containerColor = AmoledBlack,
+        containerColor = colors.background,
         bottomBar = {
             NavigationBar(
-                containerColor = GraphiteSurface,
-                tonalElevation = 0.dp
+                containerColor = colors.surface,
+                contentColor = colors.onSurface,
+                tonalElevation = 1.dp
             ) {
                 Screen.bottomNavItems.forEach { screen ->
                     val selected = currentRoute == screen.route
@@ -75,14 +72,15 @@ fun AmpereXNavGraph(
                         label = {
                             Text(
                                 text = screen.title,
-                                fontSize = 11.sp,
-                                color = if (selected) ElectricLime else TextMuted
+                                fontSize = 11.sp
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.Black,
-                            indicatorColor = ElectricLime,
-                            unselectedIconColor = TextMuted
+                            selectedIconColor = colors.onSecondaryContainer,
+                            selectedTextColor = colors.onSurface,
+                            unselectedIconColor = colors.onSurfaceVariant,
+                            unselectedTextColor = colors.onSurfaceVariant,
+                            indicatorColor = colors.secondaryContainer
                         )
                     )
                 }
