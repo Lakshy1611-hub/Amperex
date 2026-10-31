@@ -30,7 +30,8 @@ class MainActivity : ComponentActivity() {
         val settingsViewModel = SettingsViewModel(app.batteryRepository, app.exportManager)
 
         setContent {
-            AmpereXTheme(darkTheme = true) {
+            // Follow the device's Light/Dark setting instead of forcing dark mode.
+            AmpereXTheme {
                 val navController = rememberNavController()
                 AmpereXNavGraph(
                     navController = navController,
