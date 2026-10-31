@@ -30,10 +30,19 @@ class BatteryStateReceiver : BroadcastReceiver() {
                             startPercentage = sample.percentage,
                             plugType = sample.plugType
                         )
+                        // A new charging session ends the current unplugged-use session.
+                        context.getSharedPreferences("battery_usage_session", Context.MODE_PRIVATE)
+                            .edit().clear().apply()
                     }
                     Intent.ACTION_POWER_DISCONNECTED -> {
                         val sample = batteryRepo.captureCurrentSample(forceRecord = true)
                         chargingRepo.completeActiveSession(endPercentage = sample.percentage)
+                        // Start a fresh app-usage window at the exact unplug event.
+                        context.getSharedPreferences("battery_usage_session", Context.MODE_PRIVATE)
+                            .edit()
+                            .putLong("started_at", System.currentTimeMillis())
+                            .putInt("start_level", sample.percentage)
+                            .apply()
                     }
                     Intent.ACTION_BATTERY_LOW,
                     Intent.ACTION_BATTERY_OKAY,
