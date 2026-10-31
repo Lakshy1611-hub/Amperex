@@ -5,6 +5,7 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.amperex.batteryintelligence.data.repository.DischargeSessionSnapshot
 import com.amperex.batteryintelligence.data.repository.UsageStatsRepository
 import com.amperex.batteryintelligence.domain.model.AppUsageInfo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,9 @@ import kotlinx.coroutines.launch
 data class AppsUiState(
     val hasPermission: Boolean = false,
     val appUsageList: List<AppUsageInfo> = emptyList(),
-    val isLoading: Boolean = false
+    val session: DischargeSessionSnapshot? = null,
+    val isLoading: Boolean = false,
+    val lastUpdatedAt: Long = 0L
 )
 
 class AppsViewModel(
@@ -27,15 +30,28 @@ class AppsViewModel(
     private val _uiState = MutableStateFlow(AppsUiState())
     val uiState: StateFlow<AppsUiState> = _uiState.asStateFlow()
 
-    init {
-        checkPermissionAndLoad()
-    }
+    init { checkPermissionAndLoad() }
 
     fun checkPermissionAndLoad() {
         val granted = usageStatsRepository.hasUsageStatsPermission()
         _uiState.update { it.copy(hasPermission = granted) }
-        if (granted) {
-            loadUsageStats()
+        if (granted) refresh()
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val session = usageStatsRepository.getDischargeSessionSnapshot()
+            val list = if (session.isCharging) emptyList()
+                else usageStatsRepository.getAppUsageList(sinceTimestamp = session.startedAt)
+            _uiState.update {
+                it.copy(
+                    session = session,
+                    appUsageList = list,
+                    isLoading = false,
+                    lastUpdatedAt = System.currentTimeMillis()
+                )
+            }
         }
     }
 
@@ -44,13 +60,5 @@ class AppsViewModel(
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         context.startActivity(intent)
-    }
-
-    private fun loadUsageStats() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            val list = usageStatsRepository.getAppUsageList(days = 1)
-            _uiState.update { it.copy(appUsageList = list, isLoading = false) }
-        }
     }
 }
