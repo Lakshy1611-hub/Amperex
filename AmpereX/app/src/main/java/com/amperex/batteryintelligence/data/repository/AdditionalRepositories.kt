@@ -101,16 +101,11 @@ class HealthRepository(
             else -> BatteryHealthState.UNKNOWN
         }
 
-        // Cycle count: Available on Android 14+ (API 34) on supported devices
-        val cycleCount: Int? = try {
-            val cycles = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CYCLE_COUNT)
-            if (cycles > 0) cycles else null
-        } catch (e: Exception) {
-            null
-        }
+        // Android does not expose a portable public battery-cycle-count API.
+        // Keep this unknown instead of reporting a fabricated value.
+        val cycleCount: Int? = null
 
-        // Standard Android design capacity: Generally inaccessible via public API, some vendors expose via sysfs
-        // If not accessible, do not invent.
+        // Design/full-charge capacity are not available through a universal public API.
         val designCapacityMah: Int? = null
         val measuredFullCapacityMah: Int? = null
         val count = healthDao.getObservationsCount()
@@ -154,7 +149,7 @@ class UsageStatsRepository(private val context: Context) {
         ) ?: return@withContext emptyList()
 
         stats
-            .filter { it.totalTimeInForeground > 60_000L } // More than 1 minute
+            .filter { it.totalTimeInForeground > 60_000L }
             .sortedByDescending { it.totalTimeInForeground }
             .take(30)
             .map { stat ->
