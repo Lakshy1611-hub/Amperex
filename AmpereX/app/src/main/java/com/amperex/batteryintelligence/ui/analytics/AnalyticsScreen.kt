@@ -38,8 +38,6 @@ import com.amperex.batteryintelligence.ui.components.DisclaimerBanner
 import com.amperex.batteryintelligence.ui.components.InteractiveBatteryChart
 import com.amperex.batteryintelligence.ui.components.MetricCard
 import com.amperex.batteryintelligence.ui.theme.ElectricLime
-import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.surface
-import com.amperex.batteryintelligence.ui.theme.MaterialTheme.colorScheme.outline
 import com.amperex.batteryintelligence.ui.theme.MintAccent
 import com.amperex.batteryintelligence.ui.theme.TextMuted
 import com.amperex.batteryintelligence.ui.theme.TextSecondary
