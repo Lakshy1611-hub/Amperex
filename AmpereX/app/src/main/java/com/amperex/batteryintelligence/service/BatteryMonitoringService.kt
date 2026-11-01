@@ -14,67 +14,60 @@ import com.amperex.batteryintelligence.MainActivity
 import com.amperex.batteryintelligence.R
 import com.amperex.batteryintelligence.data.local.AmpereXDatabase
 import com.amperex.batteryintelligence.data.repository.BatteryRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-/**
- * Opt-in user-initiated foreground service for high-resolution charging monitoring.
- * Runs only when the user explicitly engages active session benchmarking.
- */
+/** Persistent, user-visible battery sampler. Android/OEM policies can still stop it. */
 class BatteryMonitoringService : Service() {
-
-    private val serviceJob = Job()
+    private val serviceJob = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + serviceJob)
-    private val CHANNEL_ID = "amperex_active_monitoring_channel"
-    private val NOTIFICATION_ID = 1001
+    private val channelId = "amperex_background_monitoring"
+    private val notificationId = 1001
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification = buildNotification("Monitoring active battery telemetry...")
-        startForeground(NOTIFICATION_ID, notification)
-
+        startForeground(notificationId, buildNotification("Starting battery monitoring…"))
         scope.launch {
-            val db = AmpereXDatabase.getInstance(applicationContext)
-            val repo = BatteryRepository(applicationContext, db.batteryDao())
-
+            val repo = BatteryRepository(applicationContext, AmpereXDatabase.getInstance(applicationContext).batteryDao())
             while (isActive) {
-                val sample = repo.captureCurrentSample(forceRecord = false)
-                val currentText = if (sample.currentMa != null) "${sample.currentMa} mA" else "Current N/A"
-                val updatedNotif = buildNotification("${sample.percentage}% • $currentText • ${sample.temperatureCelsius ?: "--"}°C")
-                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                manager.notify(NOTIFICATION_ID, updatedNotif)
-
-                delay(15_000L) // Battery-conscious 15-second interval during active benchmark
+                try {
+                    val sample = repo.captureCurrentSample(forceRecord = true)
+                    val current = sample.currentMa?.let { "${it} mA" } ?: "Current unavailable"
+                    val temp = sample.temperatureCelsius?.let { "${it}°C" } ?: "Temp unavailable"
+                    val status = "${sample.percentage}% • $current • $temp"
+                    (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                        .notify(notificationId, buildNotification(status))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // Sensor/database errors are transient; keep the monitor alive.
+                }
+                delay(60_000L)
             }
         }
-
-        return START_NOT_STICKY
     }
 
-    private fun buildNotification(contentText: String): Notification {
-        val openAppIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("AmpereX • Active Session")
+    private fun buildNotification(contentText: String): Notification {
+        val openIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(this, 0, openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle("AmpereX • Background monitoring")
             .setContentText(contentText)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_charging)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
+            .setOnlyAlertOnce(true)
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
@@ -82,20 +75,14 @@ class BatteryMonitoringService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "AmpereX Active Benchmark",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Shows real-time battery status while benchmark is running"
-            }
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(channel)
+            val channel = NotificationChannel(channelId, "AmpereX Background Monitoring", NotificationManager.IMPORTANCE_LOW)
+                .apply { description = "Ongoing battery sampling status" }
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
         }
     }
 
     override fun onDestroy() {
-        serviceJob.cancel()
+        scope.cancel()
         super.onDestroy()
     }
 
