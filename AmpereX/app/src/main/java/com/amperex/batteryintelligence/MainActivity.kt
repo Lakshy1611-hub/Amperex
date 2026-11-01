@@ -1,10 +1,13 @@
 package com.amperex.batteryintelligence
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
+import com.amperex.batteryintelligence.service.BatteryMonitoringService
 import com.amperex.batteryintelligence.ui.analytics.AnalyticsViewModel
 import com.amperex.batteryintelligence.ui.apps.AppsViewModel
 import com.amperex.batteryintelligence.ui.charging.ChargingViewModel
@@ -15,22 +18,26 @@ import com.amperex.batteryintelligence.ui.settings.SettingsViewModel
 import com.amperex.batteryintelligence.ui.theme.AmpereXTheme
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Keep local battery samples updating when the app is backgrounded.
+        try {
+            val serviceIntent = Intent(this, BatteryMonitoringService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(serviceIntent)
+            else startService(serviceIntent)
+        } catch (_: Exception) {
+            // The UI remains available if OS policy prevents background execution.
+        }
 
         val app = application as AmpereXApplication
-
         val homeViewModel = HomeViewModel(app.batteryRepository)
         val analyticsViewModel = AnalyticsViewModel(app.batteryRepository, app.database.dailySummaryDao())
         val healthViewModel = HealthViewModel(app.healthRepository)
         val appsViewModel = AppsViewModel(this, app.usageStatsRepository)
         val chargingViewModel = ChargingViewModel(app.batteryRepository, app.chargingRepository)
         val settingsViewModel = SettingsViewModel(app.batteryRepository, app.exportManager)
-
         setContent {
-            // Follow the device's Light/Dark setting instead of forcing dark mode.
             AmpereXTheme {
                 val navController = rememberNavController()
                 AmpereXNavGraph(
