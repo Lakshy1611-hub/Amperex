@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.amperex.batteryintelligence.MainActivity
-import com.amperex.batteryintelligence.R
 import com.amperex.batteryintelligence.data.local.AmpereXDatabase
 import com.amperex.batteryintelligence.data.repository.BatteryRepository
 import kotlinx.coroutines.CancellationException
@@ -60,12 +59,15 @@ class BatteryMonitoringService : Service() {
         val openIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        val pendingIntent = PendingIntent.getActivity(this, 0, openIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle("AmpereX • Background monitoring")
             .setContentText(contentText)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            // Use a public Android system icon so this does not depend on generated app resources.
+            .setSmallIcon(android.R.drawable.ic_menu_info_details)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setContentIntent(pendingIntent)
@@ -75,9 +77,11 @@ class BatteryMonitoringService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "AmpereX Background Monitoring", NotificationManager.IMPORTANCE_LOW)
-                .apply { description = "Ongoing battery sampling status" }
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
+            val channel = NotificationChannel(
+                channelId, "AmpereX Background Monitoring", NotificationManager.IMPORTANCE_LOW
+            ).apply { description = "Ongoing battery sampling status" }
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                .createNotificationChannel(channel)
         }
     }
 
